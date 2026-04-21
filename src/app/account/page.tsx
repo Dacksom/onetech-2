@@ -18,7 +18,7 @@ export default function AccountPage() {
   const orders = useOrders((s) => s.list);
 
   return (
-    <div className="pb-6">
+    <div className="pb-6 lg:max-w-[680px] lg:mx-auto lg:pt-2">
       <header className="px-5 pt-6 pb-3">
         <span className="brand-label">Mi cuenta</span>
       </header>

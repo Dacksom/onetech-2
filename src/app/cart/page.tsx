@@ -51,7 +51,7 @@ export default function CartPage() {
       animate={{ x: 0 }}
       exit={{ x: "100%" }}
       transition={{ type: "spring", damping: 28, stiffness: 260 }}
-      className="flex flex-col min-h-screen bg-surface-base relative z-10"
+      className="flex flex-col min-h-screen bg-surface-base relative z-10 lg:max-w-[720px] lg:mx-auto lg:min-h-0"
     >
       <TopBar title="Tu carrito" />
 

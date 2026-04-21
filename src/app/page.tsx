@@ -1,26 +1,41 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Bell, ShoppingBag, Truck, ShieldCheck } from "lucide-react";
+import Image from "next/image";
+import { Search, Heart, ShoppingBag, Truck, ShieldCheck, ArrowRight } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { CATEGORIES, PRODUCTS, BRANDS } from "@/data/products";
 import { useCart } from "@/store/cart";
+import { useSaved } from "@/store/saved";
+import { useSearch } from "@/store/search";
 
 export default function HomePage() {
   const cartCount = useCart((s) => s.items.reduce((n, i) => n + i.qty, 0));
+  const savedCount = useSaved((s) => s.ids.length);
+  const openSearch = useSearch((s) => s.openSearch);
   const featured = PRODUCTS.filter((p) => p.highlighted);
-  const newArrivals = PRODUCTS.filter((p) => p.estado === "Nuevo").slice(0, 6);
+  const newArrivals = PRODUCTS.filter((p) => p.estado === "Nuevo").slice(0, 8);
 
   return (
     <div className="pb-8">
-      {/* Top bar */}
-      <header className="px-5 pt-5 pb-3 flex items-center justify-between">
+
+      {/* ── Mobile top bar ── */}
+      <header className="lg:hidden px-5 pt-5 pb-3 flex items-center justify-between">
         <Logo className="text-[19px]" />
         <div className="flex items-center gap-2">
-          <button className="h-10 w-10 rounded-full bg-white border-hairline border-black/8 flex items-center justify-center tap shadow-soft">
-            <Bell size={17} className="text-ink" strokeWidth={1.5} />
-          </button>
+          {/* Guardados — reemplaza la campana */}
+          <Link
+            href="/saved"
+            className="relative h-10 w-10 rounded-full bg-white border-hairline border-black/8 flex items-center justify-center tap shadow-soft"
+          >
+            <Heart size={17} className="text-ink" strokeWidth={1.5} />
+            {savedCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-[16px] min-w-[16px] px-1 rounded-full bg-brand-gradient text-white text-[9px] font-medium flex items-center justify-center">
+                {savedCount}
+              </span>
+            )}
+          </Link>
           <Link
             href="/cart"
             className="relative h-10 w-10 rounded-full bg-white border-hairline border-black/8 flex items-center justify-center tap shadow-soft"
@@ -35,210 +50,173 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Search */}
-      <div className="px-5">
-        <div className="flex items-center h-11 px-4 gap-2.5 rounded-2xl bg-white border-hairline border-black/8 shadow-soft">
-          <Search size={16} className="text-ink-muted" strokeWidth={1.5} />
-          <span className="text-[13px] text-ink-muted">
-            Buscar laptops, monitores…
-          </span>
+      {/* ── Desktop hero — split banners ── */}
+      <section className="hidden lg:grid lg:grid-cols-[2fr_1fr_1fr] gap-4 mb-8 items-stretch">
+        {/* Main hero — video background, ratio 16:9 */}
+        <div className="relative rounded-2xl overflow-hidden bg-[#0a0a14] aspect-video flex items-end col-span-1">
+          {/* Video ocupa el contenedor exacto */}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src="/hero.mp4" type="video/mp4" />
+          </video>
+
+          {/* Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+          {/* Content */}
+          <div className="relative z-10 p-8 flex-1">
+            <span className="text-white/60 text-[10px] tracking-[0.2em] uppercase font-medium">ONETECH Venezuela</span>
+            <h1 className="text-white text-[28px] font-medium tracking-tight leading-tight mt-1 mb-2 drop-shadow-lg">
+              Tu setup ideal,<br />al mejor precio.
+            </h1>
+            <p className="text-white/75 text-[13px] mb-4 drop-shadow">Entrega en todo el país.</p>
+            <Link href="/catalog" className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-white text-brand-deep text-[12.5px] font-medium hover:bg-white/90 transition-colors">
+              Ver catálogo <ArrowRight size={13} />
+            </Link>
+          </div>
         </div>
+
+        {/* Mini banner — Laptops */}
+        <Link href="/catalog?cat=laptops" className="relative rounded-2xl overflow-hidden bg-[#0d1f5c] min-h-[200px] flex flex-col justify-end p-5 group hover:scale-[1.01] transition-transform">
+          <div className="absolute inset-0 flex items-center justify-center opacity-25 text-[90px]">🖥️</div>
+          <span className="relative z-10 text-white/60 text-[10px] tracking-[0.18em] uppercase font-medium">Categoría</span>
+          <span className="relative z-10 text-white text-[18px] font-medium tracking-tight mt-0.5">Laptops</span>
+          <span className="relative z-10 text-white/50 text-[11px] mt-0.5">Desde $180 USD</span>
+        </Link>
+
+        {/* Mini banner — PC Gamer */}
+        <Link href="/catalog?cat=pc" className="relative rounded-2xl overflow-hidden bg-[#1a0533] min-h-[200px] flex flex-col justify-end p-5 group hover:scale-[1.01] transition-transform">
+          <div className="absolute inset-0 flex items-center justify-center opacity-25 text-[90px]">🎮</div>
+          <span className="relative z-10 text-white/60 text-[10px] tracking-[0.18em] uppercase font-medium">Gaming</span>
+          <span className="relative z-10 text-white text-[18px] font-medium tracking-tight mt-0.5">PC Gamer</span>
+          <span className="relative z-10 text-white/50 text-[11px] mt-0.5">Sets completos</span>
+        </Link>
+      </section>
+
+      {/* ── Mobile Search ── */}
+      <div className="lg:hidden px-5">
+        <button
+          onClick={() => openSearch()}
+          className="w-full flex items-center h-11 px-4 gap-2.5 rounded-2xl bg-white border-hairline border-black/8 shadow-soft tap"
+        >
+          <Search size={16} className="text-ink-muted" strokeWidth={1.5} />
+          <span className="text-[13px] text-ink-muted">Buscar laptops, monitores…</span>
+        </button>
       </div>
 
-      {/* Hero with brand gradient */}
-      <section className="px-5 mt-5">
-        <div className="relative rounded-3xl p-5 overflow-hidden bg-brand-gradient text-white">
-          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-          <div className="absolute -left-6 bottom-0 h-24 w-24 rounded-full bg-white/10 blur-xl" />
-          <div className="relative">
-            <span className="inline-flex items-center h-6 px-2.5 rounded-full bg-white/15 backdrop-blur text-[10px] tracking-[0.18em] uppercase font-medium">
-              Abril · Semana Tech
-            </span>
-            <h1 className="mt-3 text-[26px] leading-[1.1] font-medium tracking-tight max-w-[230px]">
-              Equipa tu setup con tecnología de verdad.
-            </h1>
-            <p className="mt-2 text-[12.5px] text-white/80 max-w-[240px] leading-relaxed">
-              Precios en USD · Zelle, Pago Móvil y Crypto.
-              Envío a toda Venezuela.
-            </p>
-            <div className="mt-4 flex items-center gap-2">
-              <Link
-                href="/catalog"
-                className="h-10 px-4 rounded-xl bg-white text-brand-deep text-[13px] font-medium flex items-center tap"
-              >
-                Ver catálogo
-              </Link>
-              <Link
-                href="/product/PC-GAMER-5600"
-                className="h-10 px-4 rounded-xl bg-white/15 text-white text-[13px] font-medium flex items-center backdrop-blur tap"
-              >
-                Combo Gamer
-              </Link>
-            </div>
-          </div>
-          <div className="absolute right-2 bottom-2 text-[72px] opacity-90 select-none">
-            🎮
-          </div>
-        </div>
-      </section>
+      {/* ── Mobile video hero ── */}
+      <div className="lg:hidden mt-4 mx-5 rounded-2xl overflow-hidden">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-auto block"
+        >
+          <source src="/hero.mp4" type="video/mp4" />
+        </video>
+      </div>
 
-      {/* Brands */}
-      <section className="mt-6">
-        <div className="px-5 flex items-end justify-between">
-          <h2 className="text-[15px] font-medium tracking-tight">
-            Marcas
-          </h2>
-          <Link
-            href="/catalog"
-            className="text-[12px] text-brand-deep font-medium"
-          >
-            Ver todas
-          </Link>
-        </div>
-        <div className="mt-3 flex gap-2 overflow-x-auto no-scrollbar snap-x-rail px-5">
-          {BRANDS.map((b) => (
-            <button
-              key={b}
-              className="flex-shrink-0 h-9 px-4 rounded-full border-hairline border-black/10 bg-white brand-label tap"
-            >
-              {b}
-            </button>
-          ))}
-        </div>
-      </section>
 
-      {/* Categories */}
-      <section className="mt-6 px-5">
-        <h2 className="text-[15px] font-medium tracking-tight">Categorías</h2>
-        <div className="mt-3 grid grid-cols-3 gap-2.5">
-          {CATEGORIES.map((c) => (
-            <Link
-              key={c.id}
-              href={`/catalog?cat=${c.id}`}
-              className="h-[88px] rounded-2xl bg-white border-hairline border-black/8 flex flex-col items-center justify-center gap-1 shadow-soft tap"
-            >
-              <span className="text-2xl">{c.emoji}</span>
-              <span className="text-[11px] text-ink font-medium tracking-tight">
-                {c.label}
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
 
-      {/* Featured */}
+      {/* ── Featured ── */}
       <section className="mt-7">
-        <div className="px-5 flex items-end justify-between">
+        <div className="px-5 lg:px-0 flex items-end justify-between">
           <div>
             <span className="brand-label">Destacados</span>
-            <h2 className="text-[17px] font-medium tracking-tight">
+            <h2 className="text-[17px] lg:text-[20px] font-medium tracking-tight">
               Seleccionados para ti
             </h2>
           </div>
-          <Link
-            href="/catalog"
-            className="text-[12px] text-brand-deep font-medium"
-          >
+          <Link href="/catalog" className="text-[12px] text-brand-deep font-medium">
             Ver todo
           </Link>
         </div>
-        <div className="mt-3 flex gap-3 overflow-x-auto no-scrollbar snap-x-rail px-5">
+        {/* Mobile: horizontal scroll */}
+        <div className="lg:hidden mt-3 flex gap-3 overflow-x-auto no-scrollbar snap-x-rail px-5">
           {featured.map((p) => (
             <div key={p.id} className="flex-shrink-0 w-[170px]">
               <ProductCard product={p} size="sm" />
             </div>
           ))}
         </div>
-      </section>
-
-      {/* Trust strip */}
-      <section className="mt-6 px-5">
-        <div className="rounded-2xl bg-white border-hairline border-black/8 p-3 grid grid-cols-2 gap-3 shadow-soft">
-          <div className="flex items-center gap-2.5">
-            <div className="h-9 w-9 rounded-xl bg-surface-active flex items-center justify-center">
-              <Truck size={16} className="text-brand-deep" strokeWidth={1.5} />
-            </div>
-            <div>
-              <div className="text-[12px] font-medium">Envío nacional</div>
-              <div className="text-[10.5px] text-ink-muted">
-                Zoom, MRW, Tealca
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2.5">
-            <div className="h-9 w-9 rounded-xl bg-surface-active flex items-center justify-center">
-              <ShieldCheck size={16} className="text-brand-deep" strokeWidth={1.5} />
-            </div>
-            <div>
-              <div className="text-[12px] font-medium">Garantía 4 meses</div>
-              <div className="text-[10.5px] text-ink-muted">
-                Soporte oficial
-              </div>
-            </div>
-          </div>
+        {/* Desktop: grid */}
+        <div className="hidden lg:grid mt-4 grid-cols-4 gap-4">
+          {featured.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
         </div>
       </section>
 
-      {/* New arrivals grid */}
-      <section className="mt-7 px-5">
+      {/* ── Trust strip ── */}
+      <section className="mt-6 px-5 lg:px-0">
+        <div className="rounded-2xl bg-white border-hairline border-black/8 p-3 lg:p-5 grid grid-cols-2 lg:grid-cols-4 gap-3 shadow-soft">
+          {[
+            { icon: <Truck size={16} className="text-brand-deep" strokeWidth={1.5} />, title: "Envío nacional", sub: "Zoom, MRW, Tealca" },
+            { icon: <ShieldCheck size={16} className="text-brand-deep" strokeWidth={1.5} />, title: "Garantía 4 meses", sub: "Soporte oficial" },
+            { icon: <span className="text-base">💳</span>, title: "Zelle / Pago Móvil", sub: "Crypto · Visa · MC" },
+            { icon: <span className="text-base">⚡</span>, title: "Entrega rápida", sub: "Sambil + La Chinita" },
+          ].map((item, i) => (
+            <div key={i} className="flex items-center gap-2.5">
+              <div className="h-9 w-9 rounded-xl bg-surface-active flex items-center justify-center flex-shrink-0">
+                {item.icon}
+              </div>
+              <div>
+                <div className="text-[12px] lg:text-[13px] font-medium">{item.title}</div>
+                <div className="text-[10.5px] text-ink-muted">{item.sub}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── New arrivals ── */}
+      <section className="mt-7 px-5 lg:px-0">
         <div className="flex items-end justify-between">
-          <h2 className="text-[17px] font-medium tracking-tight">
-            Nuevos ingresos
-          </h2>
+          <h2 className="text-[17px] lg:text-[20px] font-medium tracking-tight">Nuevos ingresos</h2>
           <span className="brand-label">{newArrivals.length} equipos</span>
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-3">
+        <div className="mt-3 grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
           {newArrivals.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
         </div>
       </section>
 
-      {/* Dark banner */}
-      <section className="mt-7 px-5">
-        <div className="relative rounded-3xl bg-surface-night text-white p-5 overflow-hidden">
-          <div
-            className="absolute inset-0 opacity-70"
-            style={{
-              background:
-                "radial-gradient(circle at 85% 20%, rgba(77,184,255,0.35), transparent 55%)",
-            }}
-          />
-          <div className="relative">
-            <span className="brand-label !text-white/60">Envío gratis</span>
-            <h3 className="mt-1 text-[20px] font-medium tracking-tight leading-tight max-w-[220px]">
-              En compras superiores a $300 dentro del país.
-            </h3>
-            <Link
-              href="/catalog"
-              className="mt-4 inline-flex h-10 px-4 rounded-xl bg-white text-brand-deep text-[13px] font-medium items-center tap"
-            >
-              Aprovechar ahora
-            </Link>
+      {/* ── Banner ── */}
+      <section className="mt-7 px-5 lg:px-0">
+        <Link href="/catalog" className="block">
+          <div className="relative rounded-3xl overflow-hidden">
+            <Image
+              src="/banner-onetech.png"
+              alt="Envío gratis en compras superiores a $300"
+              width={1200}
+              height={400}
+              className="w-full h-auto object-cover"
+            />
           </div>
-          <div className="absolute right-4 bottom-3 text-[60px] opacity-90">
-            🚚
-          </div>
-        </div>
+        </Link>
       </section>
 
-      {/* Admin shortcut */}
-      <section className="mt-6 px-5">
+      {/* ── Admin shortcut ── */}
+      <section className="mt-6 px-5 lg:px-0">
         <Link
           href="/admin"
-          className="flex items-center justify-between rounded-2xl bg-white border-hairline border-black/8 p-4 shadow-soft tap"
+          className="flex items-center justify-between rounded-2xl bg-white border-hairline border-black/8 p-4 lg:p-5 shadow-soft tap hover:shadow-md transition-all"
         >
           <div>
             <span className="brand-label">Staff</span>
-            <div className="text-[13px] font-medium mt-0.5">
-              Panel de gestión
-            </div>
-            <div className="text-[11px] text-ink-muted">
-              Inventario · Transferencias · Cotizaciones
-            </div>
+            <div className="text-[13px] lg:text-[14px] font-medium mt-0.5">Panel de gestión</div>
+            <div className="text-[11px] text-ink-muted">Inventario · Transferencias · Cotizaciones</div>
           </div>
-          <span className="text-brand-deep text-[13px] font-medium">
-            Abrir →
+          <span className="text-brand-deep text-[13px] font-medium flex items-center gap-1">
+            Abrir <ArrowRight size={14} />
           </span>
         </Link>
       </section>
