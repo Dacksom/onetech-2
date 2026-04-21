@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   Search, ShoppingBag, Heart, User, Bell,
@@ -22,6 +22,7 @@ const CATEGORY_NAV = [
 
 export function DesktopHeader() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [q, setQ] = useState("");
   const [brandsOpen, setBrandsOpen] = useState(false);
@@ -179,10 +180,11 @@ export function DesktopHeader() {
       <nav className="bg-[#1a3cb5] border-b border-[#1535a0]">
         <div className="max-w-[1440px] mx-auto px-6 h-[44px] flex items-center gap-1">
           {CATEGORY_NAV.map((item) => {
+            const currentCat = searchParams.get("cat");
             const isActive =
               item.href === "/catalog"
-                ? pathname === "/catalog" && !new URLSearchParams(window.location.search).get("cat")
-                : pathname.includes("catalog") && (typeof window !== "undefined" && window.location.search.includes(item.href.split("?cat=")[1] ?? "___"));
+                ? pathname === "/catalog" && !currentCat
+                : pathname.includes("catalog") && currentCat === (item.href.split("?cat=")[1] ?? "");
 
             return (
               <Link

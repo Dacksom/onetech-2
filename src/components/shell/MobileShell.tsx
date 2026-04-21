@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 import { BottomNav } from "./BottomNav";
 import { DesktopHeader } from "./DesktopHeader";
 import { StoreHydrator } from "./StoreHydrator";
@@ -56,7 +57,9 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
 
       {/* ── DESKTOP (≥ lg) ── top header + full-width content ──────── */}
       <div className="hidden lg:flex flex-col min-h-screen bg-[#eef2fb]">
-        <DesktopHeader />
+        <Suspense fallback={<div className="h-[120px] bg-white" />}>
+          <DesktopHeader />
+        </Suspense>
 
         <main
           key={pathname}
